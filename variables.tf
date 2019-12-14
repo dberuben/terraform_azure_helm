@@ -14,7 +14,7 @@ variable "mvp_budget_packet" {
 }
 
 variable "api_server_authorized_ip_ranges" {
-  default = ["127.0.0.0/32"]
+  default = string 
 }
 variable "node_resource_group" {
   default = "node"
