@@ -3,7 +3,7 @@ variable "location" {
 }
 
 variable "mvp_name" {
-  default = ""
+  default = "caca"
 }
 variable "mvp_contact_email" {
   default = "devops-mtl@thalesdigital.io"
@@ -14,7 +14,7 @@ variable "mvp_budget_packet" {
 }
 
 variable "api_server_authorized_ip_ranges" {
-  default = [""]
+  default = ["127.0.0.0/32"]
 }
 variable "node_resource_group" {
   default = "node"
