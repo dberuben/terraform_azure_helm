@@ -43,12 +43,6 @@ resource "azurerm_kubernetes_cluster" "k8s" {
     client_secret = var.azure_client_secret
   }
 
-  provisioner "local-exec" {
-    command = <<EOT
-      az aks get-credentials --resource-group "${azurerm_resource_group.k8s.name}" --name "k8s-${var.mvp_name}-${terraform.workspace}" --file admin-"${terraform.workspace}" --overwrite-existing && sleep 30 && export KUBECONFIG=admin-"${terraform.workspace}"
-    EOT
-  }
-
   tags = {
     mvp = "${var.mvp_name}-${terraform.workspace}"
     ctc = var.mvp_contact_email
