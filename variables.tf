@@ -74,7 +74,8 @@ variable "min_count" {
   }
 }
 variable "ssh_public_key" {
-  default = "~/.ssh/id_rsa.pub"
+  #default = "~/.ssh/id_rsa.pub"
+  default = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDmIm746X6j5uWieM65ep9uhHABaZITGpcnzVmlySLDQxzyUIMjFbsR6mbeHafLi/fHprGd8Iq3Qbm3ex0XvadwTqzCESlwKMivPl4bBt6dT2wFdvgXkGPPL0YV5G7RiH/pdPa+95xUBXp+wUPr4j8dddHSbVL7sgG4VPL0mqqUhQo8hr4GLU16lwiBzKAJoPfet/alRVH0+wiYhZHmuRWW+CGWXBLcTszrGUG1dj3UBXB0nz7mmD3fsajbqZhv+uALQk3Ha1MSan8gakjbrB1zvFUlugB7IJCxsxn2gibflgYRdpHi+D7CvpaD7F9s3mUtm0NSatGAkPVnDrmFylTj"
 }
 
 variable kubernetes_version {
