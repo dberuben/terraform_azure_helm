@@ -13,5 +13,6 @@ resource "gitlab_group" "example" {
 resource "gitlab_project" "example" {
   name         = "myrepo"
   description  = "An example project"
-  parent_id = "${gitlab_group.example.id}"
+  namespace_id = gitlab_group.example.id
+  visibility_level = "private"
 }
