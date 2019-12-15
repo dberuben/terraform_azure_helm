@@ -30,8 +30,8 @@ output "azurerm_resource_group" {
   value = "${azurerm_resource_group.k8s.name}"
 }
 output "http_url_to_repo" {
-  value = "${gitlab_project.example.http_url_to_repo}"
+  value = "${gitlab_project.my_repo.http_url_to_repo}"
 }
 output "web_url" {
-  value = "${gitlab_project.example.web_url}"
+  value = "${gitlab_project.my_repo.web_url}"
 }
