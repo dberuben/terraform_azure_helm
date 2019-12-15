@@ -15,14 +15,6 @@ resource "kubernetes_namespace" "cert-manager" {
   }
 }
 
-#resource "null_resource" "cert-manager-crds" {
-#  depends_on = [kubernetes_namespace.cert-manager]
-#  provisioner "local-exec" {
-#    command = "export KUBECONFIG=admin-${terraform.workspace} && kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.10/deploy/manifests/00-crds.yaml && sleep 60"
-#  }
-#
-#}
-
 
 resource "helm_release" "cert-manager-crds" {
   depends_on = [kubernetes_namespace.cert-manager]
