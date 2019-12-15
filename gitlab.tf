@@ -16,3 +16,10 @@ resource "gitlab_project" "my_repo" {
   initialize_with_readme = true
   shared_runners_enabled = var.shared_runners_enabled
 }
+
+resource "gitlab_group_variable" "secret" {
+   group     = gitlab_group.group_project.name
+   key       = "KUBECONFIG"
+   value     = "group_variable_value"
+   protected = false
+}
