@@ -14,4 +14,6 @@ resource "gitlab_project" "example" {
   description  = "An example project"
   namespace_id = gitlab_group.example.id
   visibility_level = "private"
+  pipelines_enabled = "true"
+  shared_runners_enabled = "true"
 }
