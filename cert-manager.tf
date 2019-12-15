@@ -28,7 +28,6 @@ resource "helm_release" "cert-manager-crds" {
   depends_on = [kubernetes_namespace.cert-manager]
   name       = "cert-manager-crd"
   namespace  = kubernetes_namespace.cert-manager.metadata.0.name 
-  repository = "cert-manager-crd"
   chart      = "cert-manager-crd"
   version    = "0.10.0"
 }
