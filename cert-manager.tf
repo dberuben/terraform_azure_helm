@@ -19,7 +19,7 @@ resource "kubernetes_namespace" "cert-manager" {
 resource "helm_release" "cert-manager-crds" {
   depends_on = [kubernetes_namespace.cert-manager]
   name       = "cert-manager-crd"
-  namespace  = kubernetes_namespace.cert-manager.metadata.0.name 
+  namespace  = kubernetes_namespace.cert-manager.metadata.0.name
   chart      = "cert-manager-crd"
   version    = "0.10.0"
 }
@@ -49,7 +49,7 @@ resource "helm_release" "cert-manager" {
 resource "helm_release" "cluster_issuer" {
   depends_on = [helm_release.cert-manager, kubernetes_namespace.cert-manager, helm_release.cert-manager-crds]
   name       = "cluster-issuer"
-  namespace  = "cert-manager"
+  namespace  = kubernetes_namespace.cert-manager.metadata.0.name
   chart      = "cluster-issuer"
   timeout    = "300"
   wait       = "true"
