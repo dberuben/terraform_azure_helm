@@ -9,7 +9,6 @@ resource "gitlab_group" "example" {
   description = "An example group"
 }
 
-// Create a project in the example group
 resource "gitlab_project" "example" {
   name         = "myrepo"
   description  = "An example project"
