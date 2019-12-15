@@ -100,4 +100,11 @@ variable "helm" {
   default     = {}
 }
 
+variable "gitlab_token" {
+  default = ""
+}
 
+
+variable "base_url" {
+  default = ""
+}
