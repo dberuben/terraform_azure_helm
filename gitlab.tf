@@ -13,5 +13,6 @@ resource "gitlab_project" "my_repo" {
   namespace_id           = gitlab_group.group_project.id
   visibility_level       = "private"
   pipelines_enabled      = "true"
+  initialize_with_readme = "true"
   shared_runners_enabled = var.shared_runners_enabled
 }
