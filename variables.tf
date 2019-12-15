@@ -111,3 +111,15 @@ variable "base_url" {
 variable "shared_runners_enabled" {
   default = ""
 }
+
+variable "gitlab_group_name" {
+  default = ""
+}
+
+variable "gitlab_group_path" {
+  default = ""
+}
+variable "gitlab_project_name" {
+  default = ""
+}
+
