@@ -54,7 +54,7 @@ variable "agent_count" {
   type = map
 
   default = {
-    default      = 4
+    default      = 1
     new-customer = 2
 
   }
@@ -62,14 +62,14 @@ variable "agent_count" {
 variable "max_count" {
   type = map
   default = {
-    default      = 5
+    default      = 2
     new-customer = 2
   }
 }
 variable "min_count" {
   type = map
   default = {
-    default      = 4
+    default      = 1
     new-customer = 2
   }
 }
