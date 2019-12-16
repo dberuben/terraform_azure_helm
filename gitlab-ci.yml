@@ -1,0 +1,101 @@
+image: node:13
+variables:
+   DOCKER_DRIVER: overlay2
+   SONAR_URL: $SONAR_URL
+   SONAR_TOKEN: $SONAR_TOKEN
+   PROJECT_KEYS: orbis
+   PROJECT_NAME: Orbis
+   KUBECONFIG: $CI_PROJECT_DIR/kube_config
+   HELM_VERSION: "v2.15.1"
+   KUBE_LATEST_VERSION: "v1.11.3"
+stages:
+  - lint
+  - sonar
+  - build
+  - deploy-to-demo
+.npm-lint:
+  stage: lint
+  before_script:
+   - npm install
+  script:
+    - npm run lint
+  environment:
+    name: sandbox
+  only:
+    - master
+.sonar-orbis-ui:
+  stage: sonar
+  image: ciricihq/gitlab-sonar-scanner
+  variables:
+    SONAR_URL: $SONAR_URL
+    SONAR_PROJECT_VERSION: "$CI_BUILD_ID"
+    SONAR_ANALYSIS_MODE: publish
+    SONAR_SOURCES: "."
+    NODE_PATH: /usr/lib/node_modules
+  script:
+  - apk update
+  - apk add npm
+  - npm config set unsafe-perm true
+  - npm install -g typescript
+  - npm config set unsafe-perm false
+  - gitlab-sonar-scanner \
+    -Dsonar.gitlab.commit_sha=$CI_COMMIT_SHA
+    -Dsonar.gitlab.project_id=$CI_PROJECT_ID
+    -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME
+    -Dsonar.gitlab.user_token=$SONAR_GITLAB_TOKEN
+    -Dsonar.projectKey="$CI_PROJECT_NAME"
+    -Dsonar.projectName="$CI_PROJECT_NAME"
+    -Dsonar.login=$SONAR_TOKEN
+  only:
+    - master
+.sonar-orbis-ui-reports:
+  stage: sonar
+  image: ciricihq/gitlab-sonar-scanner
+  variables:
+    SONAR_URL: ${SONAR_URL}
+    SONAR_PROJECT_VERSION: "$CI_BUILD_ID"
+    SONAR_PROJECT_NAME: "Orbis UI"
+    SONAR_ANALYSIS_MODE: preview
+    SONAR_SOURCES: "."
+    NODE_PATH: /usr/lib/node_modules
+  script:
+  - apk update
+  - apk add npm
+  - npm install -g typescript
+  - gitlab-sonar-scanner \
+    -Dproject.settings=SourceCode/orbis-ui/sonar-project.properties
+    -Dsonar.gitlab.commit_sha=${CI_COMMIT_SHA}
+    -Dsonar.gitlab.project_id=${CI_PROJECT_ID}
+    -Dsonar.gitlab.ref_name=${CI_COMMIT_REF_NAME}
+    -Dsonar.gitlab.user_token=$SONAR_GITLAB_TOKEN
+    -Dsonar.projectKey=orbis-ui
+    -Dsonar.login=${SONAR_TOKEN}
+  only:
+    - master
+.build-ui-demo:
+  stage: build
+  script:
+    - npm install
+    - npx vue-cli-service build --mode demo
+  artifacts:
+    paths:
+      - dist
+    expire_in: 1 day
+    when: on_success
+  only:
+    - master
+.deploy-ui-demo:
+ stage: deploy-to-demo
+ dependencies:
+   - build-ui-demo
+ before_script:
+   - curl --location "https://cli.run.pivotal.io/stable?release=linux64-binary&source=github" | tar zx
+   - ./cf login -u $CF_USERNAME -p $CF_PASSWORD -a api.sys.devtest.platform.thalesdigital.io -s demo
+ script:
+    - cp nginx/* dist/
+    - cd dist
+    - ./../cf push orbis-ui-demo
+ environment:
+    name: development
+ only:
+    - master
