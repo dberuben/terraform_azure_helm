@@ -34,10 +34,3 @@ resource "null_resource" "commit_pipeline" {
     interpreter = ["PowerShell", "-Command"]
   }
 }
-
-variable "owner_email" {
-  default = ""
-}
-variable "owner_name" {
-  default = ""
-}

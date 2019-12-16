@@ -123,3 +123,9 @@ variable "gitlab_project_name" {
   default = ""
 }
 
+variable "owner_email" {
+  default = ""
+}
+variable "owner_name" {
+  default = ""
+}
