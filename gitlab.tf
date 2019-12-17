@@ -9,7 +9,7 @@ resource "gitlab_group" "group_project" {
 }
 
 resource "gitlab_project" "my_repo" {
-  depends_on = [gitlab_group.group_project]
+  depends_on             = [gitlab_group.group_project]
   name                   = var.gitlab_project_name
   namespace_id           = gitlab_group.group_project.id
   visibility_level       = "private"

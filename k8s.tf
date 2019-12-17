@@ -10,7 +10,7 @@ resource "azurerm_kubernetes_cluster" "k8s" {
   dns_prefix                      = "${var.mvp_name}-${terraform.workspace}"
   kubernetes_version              = var.kubernetes_version
   api_server_authorized_ip_ranges = var.api_server_authorized_ip_ranges
-  node_resource_group             = "${terraform.workspace}-${var.node_resource_group}"
+  node_resource_group             = "${var.mvp_name}-${var.node_resource_group}-${terraform.workspace}"
 
   network_profile {
     network_plugin    = "azure"
