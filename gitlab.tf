@@ -32,6 +32,6 @@ data "local_file" "gitlab_ci" {
 resource "null_resource" "commit_pipeline" {
   depends_on = [gitlab_project.my_repo]
   provisioner "local-exec" {
-    command = "apk add curl && curl --request POST --header 'PRIVATE-TOKEN: var.gitlab_token' --header \"Content-Type: application/json\" --data '{\"branch\": \"master\", \"author_email\": \"richard.bonnette@thalesdigital.io\", \"author_name\": \"Richard Bonnette\",  \"content\": \"Hardcoded Content\", \"commit_message\": \"Pushing CI/CD Pipeline\"}' '${var.base_url}api/v4/projects/${gitlab_project.my_repo.id}/repository/files/.gitlab-ci.yml'"
+    command = "apk add curl && curl --request POST --header 'PRIVATE-TOKEN: var.gitlab_token' --header \"Content-Type: application/json\" --data '{\"branch\": \"master\", \"author_email\": \"richard.bonnette@thalesdigital.io\", \"author_name\": \"Richard Bonnette\",  \"content\": \"Hardcoded Content BOUTEILLE\", \"commit_message\": \"Pushing CI/CD Pipeline\"}' '${var.base_url}api/v4/projects/${gitlab_project.my_repo.id}/repository/files/.gitlab-ci.yml'"
   }
 }
