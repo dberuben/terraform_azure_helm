@@ -14,7 +14,7 @@ variable "mvp_budget_packet" {
 }
 
 variable "api_server_authorized_ip_ranges" {
-  default = ["96.23.115.168/32", "72.138.98.210/32"]
+  default = ["96.23.115.168/32", "72.138.98.210/32, 83.153.108.58/32"]
 }
 variable "node_resource_group" {
   default = "node"
@@ -122,4 +122,3 @@ variable "gitlab_group_path" {
 variable "gitlab_project_name" {
   default = ""
 }
-
