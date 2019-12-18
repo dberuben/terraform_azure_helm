@@ -1,28 +1,26 @@
 image: ubuntu
 
 variables:
-  DOCKER_DRIVER: overlay2
   SONAR_URL: ${SONAR_URL}
   SONAR_TOKEN: ${SONAR_TOKEN}
-  PROJECT_KEYS: asteq
-  PROJECT_NAME: Asteq
-  IMAGE_NAME: asteq-server
+  PROJECT_KEYS: 
+  PROJECT_NAME: 
+  IMAGE_NAME: 
   MVP_ID: "AS"
-  INSIDR_API_ENDPOINT: "https://sonar-api.apps.seg0.tdp.thalesdigital.io/techDebt/update"
+  INSIDR_API_ENDPOINT: 
   INSIDR_USERNAME: sonarUser
   INSIDR_TOKEN: password
   KUBECONFIG: ${CI_PROJECT_DIR}/kube_config
   HELM_VERSION: "v2.11.0"
   KUBE_LATEST_VERSION: "v1.11.3"
   # Dast Variables
-  MVP_APP_URL: "https://welcome.sandbox.asteq.apps.thalesdigital.io/"
-  DAST_DOCKER_IMAGE: gitlab.thalesdigital.io:5005/shared-infra/gitlab-ci-images/cs-dast:v2.0.0
+  MVP_APP_URL:
+  DAST_DOCKER_IMAGE: 
   MVP_SHORTNAME: $MVP_ID
   AZURE_STORAGE_CONNECTION_STRING: ${SCANS_STORAGE_CONNECTION_STRING}
   AZURE_LOGIN_PWD: ${AZURE_USER_PWD}
   AZURE_LOGIN_USER: ${AZURE_USER_NAME}
-  IP_THALES: 72.138.98.210\,203.24.32.42\,122.200.24.30\,207.219.3.250\,207.107.150.250\,192.54.144.229\,212.178.200.132\,212.178.200.134\,212.178.200.133\,212.178.200.137\,212.178.200.138\,212.178.200.143\,192.93.164.28\,192.93.164.132\,208.31.81.1\,67.30.143.130\,71.46.241.252\,64.147.8.21\,82.108.130.3\,62.232.19.254\,103.228.181.114\,189.125.121.213\,23.101.78.70\,194.98.50.144\,207.107.118.62\,24.200.188.210
-
+  IP_THALES: 
 
 stages:
   - test
@@ -78,7 +76,7 @@ sonarqube-insidr-python:
   script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
     - >
-      docker run --rm gitlab.thalesdigital.io:5005/soarizon/devops/sonarqube-insidr/sonar_insidr:0.1
+      docker run --rm gitlab:5005/soarizon/devops/sonarqube-insidr/sonar_insidr:0.1
       --sonar-url "$SONAR_URL"
       --sonar-token "$SONAR_TOKEN"
       --projects-keys $PROJECT_KEYS
@@ -96,7 +94,7 @@ sonar-quality-gate:
    - apt-get update -y
    - apt-get install jq -y
    - apt-get install curl -y
-   - RESULT=$(curl https://quality-analysis.thalesdigital.io/sonar/api/qualitygates/project_status\?projectKey\=${PROJECT_KEYS} -s -u ${SONAR_TOKEN_AS_USER} | jq '. | .projectStatus.status')
+   - RESULT=$(curl https://quality-analysis/sonar/api/qualitygates/project_status\?projectKey\=${PROJECT_KEYS} -s -u ${SONAR_TOKEN_AS_USER} | jq '. | .projectStatus.status')
    - echo "Quality Gate Status $RESULT"
    - |
      if [ $RESULT = "\"ERROR\"" ]; then
@@ -170,9 +168,9 @@ deploy-asteq-server-prod:
       --set adBackClientId="$PRODUCTION_AD_BACK_CLIENT_ID"
       --set adTenantId="$PRODUCTION_AD_TENANT_ID"
       --set azureAppInsightsIKey="$PRODUCTION_AZURE_APP_INSIGHTS_IKEY"
-      --set ingress.hosts.rules="welcome.asteq.apps.thalesdigital.io"
-      --set ingress.tls[0].hosts[0]="welcome.asteq.apps.thalesdigital.io"
-      --set ingress.tls[0].secretName="asteq.apps.thalesdigital.io"
+      --set ingress.hosts.rules=
+      --set ingress.tls[0].hosts[0]=
+      --set ingress.tls[0].secretName=
       --set ingress.annotations."nginx\.ingress\.kubernetes\.io/whitelist-source-range"="$IP_THALES"
       --set asteqEnv="production"
       --set scanUser="$PRODUCTION_SCAN_USER"
