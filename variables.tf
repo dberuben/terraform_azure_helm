@@ -132,26 +132,25 @@ variable "author_name" {
 }
 
 variable "repo_owner" {
-  type    = string
   default = ""
 }
 
-variable "repo_maintainer" {
-  type    = map
-  default = {}
-}
-
-variable "repo_developer" {
-  type    = map
-  default = {}
-}
-
-variable "repo_reporter" {
-  type    = map
-  default = {}
-}
-
-variable "repo_guest" {
-  type    = map
-  default = {}
-}
+#variable "repo_maintainer" {
+#  type    = map
+#  default = {}
+#}
+#
+#variable "repo_developer" {
+#  type    = map
+#  default = {}
+#}
+#
+#variable "repo_reporter" {
+#  type    = map
+#  default = {}
+#}
+#
+#variable "repo_guest" {
+#  type    = map
+#  default = {}
+#}
