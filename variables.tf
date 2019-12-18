@@ -132,8 +132,8 @@ variable "author_name" {
 }
 
 variable "repo_owner" {
-  type    = list
-  default = []
+  type    = map
+  default = {}
 }
 
 #variable "repo_maintainer" {
