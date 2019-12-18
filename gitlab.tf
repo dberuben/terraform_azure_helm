@@ -22,21 +22,21 @@ data "gitlab_user" "owner" {
   email = var.repo_owner
 }
 
-data "gitlab_user" "maintainer" {
-  email = var.repo_maintainer
-}
-
-data "gitlab_user" "developer" {
-  email = var.repo_developer
-}
-
-data "gitlab_user" "reporter" {
-  email = var.repo_reporter
-}
-
-data "gitlab_user" "guest" {
-  email = var.repo_guest
-}
+#data "gitlab_user" "maintainer" {
+#  email = var.repo_maintainer
+#}
+#
+#data "gitlab_user" "developer" {
+#  email = var.repo_developer
+#}
+#
+#data "gitlab_user" "reporter" {
+#  email = var.repo_reporter
+#}
+#
+#data "gitlab_user" "guest" {
+#  email = var.repo_guest
+#}
 
 resource "gitlab_group_membership" "owner" {
   group_id     = data.gitlab_group.group_project.id
@@ -44,29 +44,26 @@ resource "gitlab_group_membership" "owner" {
   access_level = "owner"
 }
 
-resource "gitlab_group_membership" "maintainer" {
-  group_id     = data.gitlab_group.group_project.id
-  user_id      = data.gitlab_user.user.id
-  access_level = "maintainer"
-}
-
-resource "gitlab_group_membership" "developer" {
-  group_id     = data.gitlab_group.group_project.id
-  user_id      = data.gitlab_user.user.id
-  access_level = "developer"
-}
-
-resource "gitlab_group_membership" "reporter" {
-  group_id     = data.gitlab_group.group_project.id
-  user_id      = data.gitlab_user.user.id
-  access_level = "reporter"
-}
-
-resource "gitlab_group_membership" "guest" {
-  group_id     = data.gitlab_group.group_project.id
-  user_id      = data.gitlab_user.user.id
-  access_level = "guest"
-}
+#resource "gitlab_group_membership" "maintainer" {
+#  group_id     = data.gitlab_group.group_project.id
+#  user_id      = data.gitlab_user.user.id
+#  access_level = "maintainer"
+#
+#resource "gitlab_group_membership" "developer" {
+#  group_id     = data.gitlab_group.group_project.id
+#  user_id      = data.gitlab_user.user.id
+#  access_level = "developer"
+#
+#resource "gitlab_group_membership" "reporter" {
+#  group_id     = data.gitlab_group.group_project.id
+#  user_id      = data.gitlab_user.user.id
+#  access_level = "reporter"
+#
+#resource "gitlab_group_membership" "guest" {
+#  group_id     = data.gitlab_group.group_project.id
+#  user_id      = data.gitlab_user.user.id
+#  access_level = "guest"
+#}
 
 resource "gitlab_group_variable" "secret" {
    group     = gitlab_group.group_project.name
