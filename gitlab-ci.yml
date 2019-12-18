@@ -1,101 +1,186 @@
-image: node:13
+image: ubuntu
+
 variables:
-   DOCKER_DRIVER: overlay2
-   SONAR_URL: $SONAR_URL
-   SONAR_TOKEN: $SONAR_TOKEN
-   PROJECT_KEYS: orbis
-   PROJECT_NAME: Orbis
-   KUBECONFIG: $CI_PROJECT_DIR/kube_config
-   HELM_VERSION: "v2.15.1"
-   KUBE_LATEST_VERSION: "v1.11.3"
+  DOCKER_DRIVER: overlay2
+  SONAR_URL: ${SONAR_URL}
+  SONAR_TOKEN: ${SONAR_TOKEN}
+  PROJECT_KEYS: asteq
+  PROJECT_NAME: Asteq
+  IMAGE_NAME: asteq-server
+  MVP_ID: "AS"
+  INSIDR_API_ENDPOINT: "https://sonar-api.apps.seg0.tdp.thalesdigital.io/techDebt/update"
+  INSIDR_USERNAME: sonarUser
+  INSIDR_TOKEN: password
+  KUBECONFIG: ${CI_PROJECT_DIR}/kube_config
+  HELM_VERSION: "v2.11.0"
+  KUBE_LATEST_VERSION: "v1.11.3"
+  # Dast Variables
+  MVP_APP_URL: "https://welcome.sandbox.asteq.apps.thalesdigital.io/"
+  DAST_DOCKER_IMAGE: gitlab.thalesdigital.io:5005/shared-infra/gitlab-ci-images/cs-dast:v2.0.0
+  MVP_SHORTNAME: $MVP_ID
+  AZURE_STORAGE_CONNECTION_STRING: ${SCANS_STORAGE_CONNECTION_STRING}
+  AZURE_LOGIN_PWD: ${AZURE_USER_PWD}
+  AZURE_LOGIN_USER: ${AZURE_USER_NAME}
+  IP_THALES: 72.138.98.210\,203.24.32.42\,122.200.24.30\,207.219.3.250\,207.107.150.250\,192.54.144.229\,212.178.200.132\,212.178.200.134\,212.178.200.133\,212.178.200.137\,212.178.200.138\,212.178.200.143\,192.93.164.28\,192.93.164.132\,208.31.81.1\,67.30.143.130\,71.46.241.252\,64.147.8.21\,82.108.130.3\,62.232.19.254\,103.228.181.114\,189.125.121.213\,23.101.78.70\,194.98.50.144\,207.107.118.62\,24.200.188.210
+
+
 stages:
-  - lint
+  - test
   - sonar
+  - sonar-quality-gate
+  - TechnicalDebtToInsidr
   - build
-  - deploy-to-demo
-.npm-lint:
-  stage: lint
-  before_script:
-   - npm install
+  - deploy-to-sandbox
+  - deploy-to-prod
+
+test:
+  stage: test
+  image: node:lts-alpine
   script:
-    - npm run lint
+    - apk add --no-cache git
+    - npm i -g yarn lerna
+    - yarn
+    - lerna bootstrap
+    - yarn test:coverage
+  cache:
+    key: node-modules
+    paths:
+      - node_modules/
+      - /usr/local/lib/node_modules/
+  artifacts:
+    name: reports-${CI_COMMIT_REF_NAME}
+    when: on_success
+    expire_in: 30 mins
+    paths:
+      - reports/
+
+sonar:
+  stage: sonar
+  image: zaquestion/sonarqube-scanner
+  script:
+    - rm -rf /root/sonar_home/conf
+    - >
+      sonar-scanner
+      -D project.settings=sonar.properties
+      -D sonar.gitlab.commit_sha=${CI_COMMIT_SHA}
+      -D sonar.gitlab.project_id=${CI_PROJECT_ID}
+      -D sonar.gitlab.ref_name=${CI_COMMIT_REF_NAME}
+      -D sonar.projectKey=${PROJECT_KEYS}
+      -D sonar.projectName=${PROJECT_NAME}
+      -D sonar.host.url=${SONAR_URL}
+      -D sonar.login=${SONAR_TOKEN}
+  only:
+    - master
+
+sonarqube-insidr-python:
+  stage: TechnicalDebtToInsidr
+  image: docker
+  script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
+    - >
+      docker run --rm gitlab.thalesdigital.io:5005/soarizon/devops/sonarqube-insidr/sonar_insidr:0.1
+      --sonar-url "$SONAR_URL"
+      --sonar-token "$SONAR_TOKEN"
+      --projects-keys $PROJECT_KEYS
+      --mvp-id "$MVP_ID"
+      --insidr-api-endpoint "$INSIDR_API_ENDPOINT"
+      --insidr-username "$INSIDR_USERNAME"
+      --insidr-token "$INSIDR_TOKEN" || true
+  only:
+    - master
+
+sonar-quality-gate:
+ stage: sonar-quality-gate
+ script:
+   - cat /etc/os-release
+   - apt-get update -y
+   - apt-get install jq -y
+   - apt-get install curl -y
+   - RESULT=$(curl https://quality-analysis.thalesdigital.io/sonar/api/qualitygates/project_status\?projectKey\=${PROJECT_KEYS} -s -u ${SONAR_TOKEN_AS_USER} | jq '. | .projectStatus.status')
+   - echo "Quality Gate Status $RESULT"
+   - |
+     if [ $RESULT = "\"ERROR\"" ]; then
+      echo "Quality gate failed. Pipeline stops";
+      echo "Go to: ${SONAR_URL}/dashboard?id=${PROJECT_KEYS}";
+      exit 1;
+     else
+      echo "Quality gate is ok. Pipeline continues";
+      exit 0;
+     fi
+ only:
+  - master
+
+build-asteq-server:
+  stage: build
+  image: docker
+  script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
+    - docker build -f Dockerfile.server -t "$CI_REGISTRY_IMAGE/$IMAGE_NAME:$CI_COMMIT_SHA" .
+    - docker push "$CI_REGISTRY_IMAGE/$IMAGE_NAME:$CI_COMMIT_SHA"
+  only:
+    - master
+
+deploy-asteq-server:
+  stage: deploy-to-sandbox
+  image: dtzar/helm-kubectl:2.11.0
+  before_script:
+    - echo ${KUBE_SANDBOX_CONFIG} | base64 -d > ${KUBECONFIG}
+    - export KUBECONFIG=${KUBECONFIG}
+    - cd packages/server/deployment/
+  script:
+    - export KUBECONFIG=${KUBECONFIG}
+    - echo " >>>>>>>>>> Deploy in progress for $CI_PROJECT_NAME <<<<<<<<<< "
+    - >
+      helm upgrade
+      --install $IMAGE_NAME
+      --set replicaCount="1"
+      --set image.repository="$CI_REGISTRY_IMAGE/$IMAGE_NAME"
+      --set image.tag="$CI_COMMIT_SHA"
+      --set adFrontClientId="$SANDBOX_AD_FRONT_CLIENT_ID"
+      --set adBackClientId="$SANDBOX_AD_BACK_CLIENT_ID"
+      --set adTenantId="$SANDBOX_AD_TENANT_ID"
+      --set azureAppInsightsIKey="$SANDBOX_AZURE_APP_INSIGHTS_IKEY"
+      --set asteqEnv="sandbox"
+      --set scanUser="$SANDBOX_SCAN_USER"
+      --set scanPassword="$SANDBOX_SCAN_PASSWORD"
+      --namespace $IMAGE_NAME
+      --wait .
   environment:
     name: sandbox
   only:
     - master
-.sonar-orbis-ui:
-  stage: sonar
-  image: ciricihq/gitlab-sonar-scanner
-  variables:
-    SONAR_URL: $SONAR_URL
-    SONAR_PROJECT_VERSION: "$CI_BUILD_ID"
-    SONAR_ANALYSIS_MODE: publish
-    SONAR_SOURCES: "."
-    NODE_PATH: /usr/lib/node_modules
+
+deploy-asteq-server-prod:
+  stage: deploy-to-prod
+  image: dtzar/helm-kubectl:2.11.0
+  before_script:
+    - echo ${KUBE_PROD_CONFIG} | base64 -d > ${KUBECONFIG}
+    - export KUBECONFIG=${KUBECONFIG}
+    - cd packages/server/deployment/
   script:
-  - apk update
-  - apk add npm
-  - npm config set unsafe-perm true
-  - npm install -g typescript
-  - npm config set unsafe-perm false
-  - gitlab-sonar-scanner \
-    -Dsonar.gitlab.commit_sha=$CI_COMMIT_SHA
-    -Dsonar.gitlab.project_id=$CI_PROJECT_ID
-    -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME
-    -Dsonar.gitlab.user_token=$SONAR_GITLAB_TOKEN
-    -Dsonar.projectKey="$CI_PROJECT_NAME"
-    -Dsonar.projectName="$CI_PROJECT_NAME"
-    -Dsonar.login=$SONAR_TOKEN
+    - export KUBECONFIG=${KUBECONFIG}
+    - echo " >>>>>>>>>> Deploy in progress for $CI_PROJECT_NAME in production <<<<<<<<<< "
+    - >
+      helm upgrade
+      --install $IMAGE_NAME
+      --set replicaCount="3"
+      --set image.repository="$CI_REGISTRY_IMAGE/$IMAGE_NAME"
+      --set image.tag="$CI_COMMIT_SHA"
+      --set adFrontClientId="$PRODUCTION_AD_FRONT_CLIENT_ID"
+      --set adBackClientId="$PRODUCTION_AD_BACK_CLIENT_ID"
+      --set adTenantId="$PRODUCTION_AD_TENANT_ID"
+      --set azureAppInsightsIKey="$PRODUCTION_AZURE_APP_INSIGHTS_IKEY"
+      --set ingress.hosts.rules="welcome.asteq.apps.thalesdigital.io"
+      --set ingress.tls[0].hosts[0]="welcome.asteq.apps.thalesdigital.io"
+      --set ingress.tls[0].secretName="asteq.apps.thalesdigital.io"
+      --set ingress.annotations."nginx\.ingress\.kubernetes\.io/whitelist-source-range"="$IP_THALES"
+      --set asteqEnv="production"
+      --set scanUser="$PRODUCTION_SCAN_USER"
+      --set scanPassword="$PRODUCTION_SCAN_PASSWORD"
+      --namespace $IMAGE_NAME
+      --wait .
+  when: manual
+  environment:
+    name: prod
   only:
-    - master
-.sonar-orbis-ui-reports:
-  stage: sonar
-  image: ciricihq/gitlab-sonar-scanner
-  variables:
-    SONAR_URL: ${SONAR_URL}
-    SONAR_PROJECT_VERSION: "$CI_BUILD_ID"
-    SONAR_PROJECT_NAME: "Orbis UI"
-    SONAR_ANALYSIS_MODE: preview
-    SONAR_SOURCES: "."
-    NODE_PATH: /usr/lib/node_modules
-  script:
-  - apk update
-  - apk add npm
-  - npm install -g typescript
-  - gitlab-sonar-scanner \
-    -Dproject.settings=SourceCode/orbis-ui/sonar-project.properties
-    -Dsonar.gitlab.commit_sha=${CI_COMMIT_SHA}
-    -Dsonar.gitlab.project_id=${CI_PROJECT_ID}
-    -Dsonar.gitlab.ref_name=${CI_COMMIT_REF_NAME}
-    -Dsonar.gitlab.user_token=$SONAR_GITLAB_TOKEN
-    -Dsonar.projectKey=orbis-ui
-    -Dsonar.login=${SONAR_TOKEN}
-  only:
-    - master
-.build-ui-demo:
-  stage: build
-  script:
-    - npm install
-    - npx vue-cli-service build --mode demo
-  artifacts:
-    paths:
-      - dist
-    expire_in: 1 day
-    when: on_success
-  only:
-    - master
-.deploy-ui-demo:
- stage: deploy-to-demo
- dependencies:
-   - build-ui-demo
- before_script:
-   - curl --location "https://cli.run.pivotal.io/stable?release=linux64-binary&source=github" | tar zx
-   - ./cf login -u $CF_USERNAME -p $CF_PASSWORD -a api.sys.devtest.platform.thalesdigital.io -s demo
- script:
-    - cp nginx/* dist/
-    - cd dist
-    - ./../cf push orbis-ui-demo
- environment:
-    name: development
- only:
     - master
