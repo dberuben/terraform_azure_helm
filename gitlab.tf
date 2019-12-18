@@ -19,23 +19,23 @@ resource "gitlab_project" "my_repo" {
 }
 
 data "gitlab_user" "owner" {
-  email = ${var.repo_owner}
+  email = var.repo_owner
 }
 
 data "gitlab_user" "maintainer" {
-  email = ${var.repo_maintainer}
+  email = var.repo_maintainer
 }
 
 data "gitlab_user" "developer" {
-  email = ${var.repo_developer}
+  email = var.repo_developer
 }
 
 data "gitlab_user" "reporter" {
-  email = ${var.repo_reporter}
+  email = var.repo_reporter
 }
 
 data "gitlab_user" "guest" {
-  email = ${var.repo_guest}
+  email = var.repo_guest
 }
 
 resource "gitlab_group_membership" "owner" {
