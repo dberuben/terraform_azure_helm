@@ -130,3 +130,28 @@ variable "author_email" {
 variable "author_name" {
   default = ""
 }
+
+variable "repo_owner" {
+  type    = map
+  default = []
+}
+
+variable "repo_maintainer" {
+  type    = map
+  default = []
+}
+
+variable "repo_developer" {
+  type    = map
+  default = []
+}
+
+variable "repo_reporter" {
+  type    = map
+  default = []
+}
+
+variable "repo_guest" {
+  type    = map
+  default = []
+}
