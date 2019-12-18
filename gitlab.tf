@@ -19,7 +19,7 @@ resource "gitlab_project" "my_repo" {
 }
 
 data "gitlab_user" "owner" {
-  email = var.repo_owner
+  username = var.repo_owner
 }
 
 #data "gitlab_user" "maintainer" {
