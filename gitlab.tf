@@ -40,7 +40,7 @@ data "gitlab_user" "owner" {
 
 resource "gitlab_group_membership" "owner" {
   group_id     = gitlab_group.group_project.id
-  user_id      = data.gitlab_user.user.id
+  user_id      = data.gitlab_user.owner.id
   access_level = "owner"
 }
 
