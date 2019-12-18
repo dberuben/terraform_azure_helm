@@ -122,3 +122,11 @@ variable "gitlab_group_path" {
 variable "gitlab_project_name" {
   default = ""
 }
+
+variable "author_email" {
+  default = ""
+}
+
+variable "author_name" {
+  default = ""
+}
