@@ -130,7 +130,3 @@ variable "author_email" {
 variable "author_name" {
   default = ""
 }
-
-variable "repo_owner" {
-  default = {}
-}
