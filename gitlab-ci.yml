@@ -3,24 +3,24 @@ image: ubuntu
 variables:
   SONAR_URL: ${SONAR_URL}
   SONAR_TOKEN: ${SONAR_TOKEN}
-  PROJECT_KEYS: 
-  PROJECT_NAME: 
-  IMAGE_NAME: 
-  MVP_ID: "AS"
-  INSIDR_API_ENDPOINT: 
-  INSIDR_USERNAME: sonarUser
-  INSIDR_TOKEN: password
+  PROJECT_KEYS: project_keys
+  PROJECT_NAME: PROJECT_NAME
+  IMAGE_NAME: image_name
+  MVP_ID: "MVP_ID"
+  INSIDR_API_ENDPOINT: http://insidr_api_endpoint
+  INSIDR_USERNAME: insidr_username
+  INSIDR_TOKEN: insidr_password
   KUBECONFIG: ${CI_PROJECT_DIR}/kube_config
   HELM_VERSION: "v2.11.0"
   KUBE_LATEST_VERSION: "v1.11.3"
   # Dast Variables
-  MVP_APP_URL:
-  DAST_DOCKER_IMAGE: 
+  MVP_APP_URL: http://mvp_app_url
+  DAST_DOCKER_IMAGE: dast_docker_image
   MVP_SHORTNAME: $MVP_ID
   AZURE_STORAGE_CONNECTION_STRING: ${SCANS_STORAGE_CONNECTION_STRING}
   AZURE_LOGIN_PWD: ${AZURE_USER_PWD}
   AZURE_LOGIN_USER: ${AZURE_USER_NAME}
-  IP_THALES: 
+  IP_THALES: ip_list
 
 stages:
   - test
