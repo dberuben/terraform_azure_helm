@@ -129,3 +129,15 @@ variable "author_email" {
 variable "author_name" {
   default = ""
 }
+
+variable "namespace_name" {
+  default = ""
+}
+
+variable "gitlab_deploy_login" {
+  default = ""
+}
+
+variable "gitlab_deploy_token" {
+  default = ""
+}
