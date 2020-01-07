@@ -105,8 +105,9 @@ variable "gitlab_token" {
 }
 
 variable "base_url" {
-  default = ""
+  default = "https://gitlab.thalesdigital.io/"
 }
+
 variable "shared_runners_enabled" {
   default = ""
 }
@@ -118,6 +119,7 @@ variable "gitlab_group_name" {
 variable "gitlab_group_path" {
   default = ""
 }
+
 variable "gitlab_project_name" {
   default = ""
 }
